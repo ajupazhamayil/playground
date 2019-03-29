@@ -26,9 +26,9 @@ class Database(object):
     def __enter__(self):
         self._connection = sqlite3.connect(self._path)
         # Reset Database
-        self.execute(DbCommands.DROP)
+        #self.execute(DbCommands.DROP)
         self.execute(DbCommands.INIT)
-        self.execute(DbCommands.CLEAR)
+        #self.execute(DbCommands.CLEAR)
         return self
 
     def __exit__(self, *args, **kwargs):
@@ -62,7 +62,7 @@ class Commit(Command):
 
     def execute(self, database):
         database.commit()
-        raise Break()
+        #raise Break()
 
 
 class Insert(Command):
@@ -135,21 +135,17 @@ def main():
     for process in processes2:
         process.start()
 
-    # Wait until Daemons are done
     for process in processes2:
         process.join()   
 
     print("actual insert process completed")
     # Query a command to the database
-    queue.put(Count())
+    #queue.put(Count())
+    with Database(DB_FILENAME) as database:
+        Commit().execute(database)
+        Count().execute(database)
 
-    # Send a command to the handler
-    # To commit, clean, and close the database
-    queue.put(Commit())
-
-    # Do Not Join Daemon Threads,
-    # Join their Queues instead
-    queue.join()
+    #queue.join()
 
 
 if __name__ == '__main__':
